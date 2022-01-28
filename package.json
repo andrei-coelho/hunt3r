@@ -1,0 +1,17 @@
+{
+  "name": "hunt3r",
+  "version": "3.0.0",
+  "description": "Social Media Bot",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrei Coelho",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "node-fetch": "^3.2.0",
+    "selenium-webdriver": "^4.1.1"
+  }
+}

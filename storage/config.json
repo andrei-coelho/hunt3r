@@ -1,0 +1,5 @@
+{
+    "api_address": "http://192.168.0.11/hunt3r_api/",
+    "local_app": "",
+    "clients": "all"
+}
