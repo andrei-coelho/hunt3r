@@ -13,14 +13,26 @@ const Cliente = function(json, id_key){
     this.ancorsProfiles = []
 
     this.actionsMap = {}
+    this.actionsLim = {}
 }
 
 Cliente.prototype.setAccounts = function(accounts){
     accounts.forEach(el => this.accounts.push(new AccountCliente(el)));
 }
 
-Cliente.prototype.getAccounts = function(){
-    return this.accounts;
+Cliente.prototype.addAction = function(action){
+
+    if(this.actionsMap[action] < this.actionsLim[action]){
+        this.actionsMap[action]++;
+        return true;
+    }
+    
+    return false;
+        
+}
+
+Cliente.prototype.setActionsLimit = function(action, limit){
+    this.actionsLim[action] = limit;
 }
 
 Cliente.prototype.getActionsClient = function(){
@@ -29,6 +41,10 @@ Cliente.prototype.getActionsClient = function(){
 
 Cliente.prototype.setActionMap = function(action, quant){
     this.actionsClient[action] = quant;
+}
+
+Cliente.prototype.getAccounts = function(){
+    return this.accounts;
 }
 
 Cliente.prototype.addAccount = function(account){

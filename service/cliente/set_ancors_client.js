@@ -1,5 +1,5 @@
-import request from '../source/request.js'
-import log from '../source/log.js'
+import request from '../../source/request.js'
+import log from '../../source/log.js'
 
 export default async client => {
 

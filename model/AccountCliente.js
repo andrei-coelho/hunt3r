@@ -7,6 +7,13 @@ AccountClient.prototype.setDriver = function(driver){
     this.driver = driver;
 }
 
+AccountClient.prototype.getEmail = function(){
+    return this.email;
+}
+
+AccountClient.prototype.getSenha = function(){
+    return this.senha;
+}
 AccountClient.prototype.toFollow = function(profilesClient){
     this.profilesToFollow = profilesClient;
 }

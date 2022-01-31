@@ -1,14 +1,13 @@
-import request from '../source/request.js'
-import log from '../source/log.js'
+import request from '../../source/request.js'
+import log from '../../source/log.js'
 
-export default async (client, status, max) => {
+export default async client => {
 
     let response = await request({
         service: 'cliente',
-        function: 'getProfiles',
+        function: 'getAccounts',
         cliente: client.slug,
-        status:status,
-        max:max
+        redesocial: 'twitter'
     })
 
     if(!response.json || response.json.error) {
@@ -17,7 +16,7 @@ export default async (client, status, max) => {
         return false;
     }
 
-    client.setProfiles(response.json.data)
+    client.setAccounts(response.json.data)
     return true;
 
 }
