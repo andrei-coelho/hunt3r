@@ -12,6 +12,12 @@ const Driver = function(account, headless = false){
 
 }
 
+Driver.prototype.exit = async function(){
+    await setTimeout(async _ => {
+        await this.browser.close();
+    }, 2000);
+}
+
 Driver.prototype.saveState = async function(){
 
     await setTimeout(async _ => {
@@ -45,7 +51,7 @@ Driver.prototype.browser = async function(url){
     this.browser = await this.browser.build();
 
     this.browser.cookiesDir = global.appRoot+'\\storage\\cookies\\';
-    this.browser.cookieFile = this.browser.cookiesDir+this.account.getEmail()+".json";
+    this.browser.cookieFile = this.browser.cookiesDir+this.account+".json";
     
     if(fs.existsSync(this.browser.cookieFile)) {
     
