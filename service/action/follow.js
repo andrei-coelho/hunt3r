@@ -3,9 +3,11 @@ import { By, Key, promise } from 'selenium-webdriver'
 import request from "../../source/request.js";
 import Driver from "../../model/Driver.js";
 
+
 export default async cliente => {
     
     var sleep = false;
+    var finish = false;
 
     const to_follow = async (account, profile, clienteSlug) => {
 
@@ -70,25 +72,28 @@ export default async cliente => {
             
         }
 
-        count = 0;
-        let curtiu = 0;
-        let curtir = Math.round(Math.random() * (3 - 1) + 1); // curtir no máximo 2 publicações
-
-        while(true){
-            try {
-                if(count == 5 || curtiu >= curtir) break;
-                await driver.findElement(By.xpath("//*[@data-testid='like']")).click();
-                curtiu++;
-                await helper.sleep(2000);
-            } catch (error) {
-                await helper.sleep(2000);
-                count++;
-            }
-        }
+        
 
         // seguir...
         
         if(status){
+
+            count = 0;
+            let curtiu = 0;
+            let curtir = Math.round(Math.random() * (3 - 1) + 1); // curtir no máximo 2 publicações
+
+            while(true){
+                if(count == 5 || curtiu >= curtir) break;
+                try {
+                    await browser.findElement(By.xpath("//*[@data-testid='like']")).click();
+                    curtiu++;
+                    await helper.sleep(2000);
+                } catch (error) {
+                    await helper.sleep(2000);
+                    count++;
+                }
+            }
+
             try {
 
                 await browser
@@ -115,8 +120,6 @@ export default async cliente => {
             status: 2
         })
 
-        console.log(resp);
-
         await driver.saveState();
         await helper.sleep(2000);
         await driver.exit();
@@ -142,13 +145,9 @@ export default async cliente => {
 
             while(true){
 
-                while(sleep) {
-                    console.log("Estou aguardando para continuar o trabalho..."); 
-                    await helper.sleep(1000);
-                }
-
                 while(profiles.length > 0){
                     
+                    finish = false
                     let espere = Math.round(Math.random() * (20 - 15) + 15);
 
                     for (let i = 0; i < contas.length; i++) {
@@ -158,19 +157,25 @@ export default async cliente => {
                         let cFollowLimit = conta.actions.follow;
                         
                         if(cFollowLimit > 0) await to_follow(conta, profile, slug)
-                        if(sleep) break;
                         await helper.sleep(1000);
                     }
 
-                    if(sleep) break;
+                    finish = true;
                     await helper.sleep(espere * 60 * 1000);
+                    
+                    while(sleep) {
+                        console.log("Estou aguardando para continuar o trabalho..."); 
+                        await helper.sleep(1000);
+                    }
                     
                 }
          
                 await helper.sleep(1000);
+
                 if(profiles.length == 0) break;
 
             }
+
         }
 
     }
