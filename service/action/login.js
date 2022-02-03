@@ -74,10 +74,10 @@ export default async account => {
     await browser.findElement(By.name("password"))
          .sendKeys(account.getSenha(), Key.ENTER);
     
-    await helper.sleep(1000);
+    await helper.sleep(2000);
 
     await driver.saveState();
-    await helper.sleep(2000);
+    await helper.sleep(1000);
     await driver.exit();
 
 }

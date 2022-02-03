@@ -1,6 +1,6 @@
 const args   = process.argv,
 count_args   = process.argv.length,
-list_control = ['help', 'start', 'open', 'prospect', 'create', 'action'] 
+list_control = ['help', 'start', 'open', 'prospect', 'create', 'action', 'test'] 
 
 export default async _=> {
     
