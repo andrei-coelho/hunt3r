@@ -1,5 +1,15 @@
 export default {
 
+    getMinutesDay : function() {
+        let objDate = new Date();
+        return parseInt(objDate.getHours()) * 60 + parseInt(objDate.getMinutes());
+    },
+
+    transformMinutes : function(hour) {
+        let splh = hour.split(":");
+        return parseInt(splh[0]) * 60 + parseInt(splh[1]);
+    },
+
     full : function(){
         var data = new Date(),
             dia  = data.getDate().toString(),

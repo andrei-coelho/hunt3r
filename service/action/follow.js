@@ -2,6 +2,8 @@ import helper from "../../source/helper.js";
 import { By, Key, promise } from 'selenium-webdriver'
 import request from "../../source/request.js";
 import Driver from "../../model/Driver.js";
+import log from "../../source/log.js";
+import datetime from "../../source/datetime.js";
 
 
 export default async cliente => {
@@ -133,6 +135,8 @@ export default async cliente => {
 
     }
 
+       
+
     return {
 
         await: async status => sleep = status,
@@ -143,12 +147,31 @@ export default async cliente => {
             const profiles = cliente.profilesToFollow;
             const slug     = cliente.slug;
 
-            while(true){
+            const act_res  = await request({
+                service:  'actions',
+                function: 'get_programmed_action_follow',
+                cliente:   slug
+            })
 
+            if(act_res.json.error){
+                log.out("Não há uma ação programada para seguir")
+                return false;
+            }
+
+            const action_seguir = act_res.json.data[0];
+            const inicio_time   = datetime.transformMinutes(action_seguir.hour_start)
+            const final_time    = datetime.transformMinutes(action_seguir.hour_end)
+            
+            while(datetime.getMinutesDay() < inicio_time){
+                await helper.sleep(1000 * 10)
+            }
+            
+            while(datetime.getMinutesDay() < final_time){
+                
                 while(profiles.length > 0){
                     
                     finish = false
-                    let espere = Math.round(Math.random() * (20 - 15) + 15);
+                    let espere = Math.round(Math.random() * (5 - 3) + 3);
 
                     for (let i = 0; i < contas.length; i++) {
                         
@@ -161,6 +184,7 @@ export default async cliente => {
                     }
 
                     finish = true;
+                    console.log(espere);
                     await helper.sleep(espere * 60 * 1000);
                     
                     while(sleep) {
@@ -169,12 +193,14 @@ export default async cliente => {
                     }
                     
                 }
-         
-                await helper.sleep(1000);
 
+                await helper.sleep(1000);
                 if(profiles.length == 0) break;
+                
 
             }
+
+            console.log("acabou de seguir...");
 
         }
 
