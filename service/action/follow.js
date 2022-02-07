@@ -8,7 +8,8 @@ import datetime from "../../source/datetime.js";
 
 export default async cliente => {
     
-    var sleep = false;
+    var sleep  = false;
+    var finish = false;
 
     const to_follow = async (account, profile, clienteSlug) => {
 
@@ -203,7 +204,7 @@ export default async cliente => {
                 
                 while(profiles.length > 0){
                     
-                    let finish = false
+                    finish = false
                     let espere = Math.round(Math.random() * (5 - 3) + 3);
 
                     for (let i = 0; i < contas.length; i++) {
