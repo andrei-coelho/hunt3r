@@ -9,7 +9,6 @@ import datetime from "../../source/datetime.js";
 export default async cliente => {
     
     var sleep = false;
-    var finish = false;
 
     const to_follow = async (account, profile, clienteSlug) => {
 
@@ -18,99 +17,133 @@ export default async cliente => {
         
         await helper.sleep(3000);
 
-        let elementPresent = false;
-        let status = true;
         let count = 1;
 
-        while(!elementPresent){
+        while(true){
             try {
                 await browser.findElement(By.xpath("//*[@data-testid='placementTracking']"));
-                elementPresent = true;
+                break;
             } catch(e){
-                await helper.sleep(1000);
+                await helper.sleep(2000);
                 count++;
             }
             if(count == 5){
-                status = false;
-                break;
+               return false;
             } 
         }
 
         count = 0;
-        elementPresent = false;
 
-        while(!elementPresent){
-
+        const regexHora = /(\d{1,2})(\s)?h/ig;
+        const regexData = /(?<dia>\d{1,2})(\sde\s)?(?<mes>[a-z]+)(\sde\s)?(?<ano>\d{4})?/i;
+        let elementPresent = false;
+        
+        while (true) {
             try {
-
-                await browser.findElement(By.xpath("//*[@href='/"+profile.slug+"/followers']"));
-                let texto = await browser.findElement(By.xpath("//*[@href='/"+profile.slug+"/followers']")).getText();
-                
-                if(parseInt(texto.split(" ")[0].replace(/\./gi, "")) == 0){
-                    
-                    await request({
-                        service:  'actions',
-                        function: 'follow',
-                        cliente:   clienteSlug,
-                        perfil_id: profile.id,
-                        conta_id:  account.id,
-                        status: 5
-                    })
-
-                    await driver.saveState();
-                    await helper.sleep(2000);
-                    await driver.exit();
-                    return false;
-                }
-
+                await browser.findElement(By.xpath("//time"));
                 elementPresent = true;
-
-            } catch(e){
+                break;
+            } catch(e) {
+                if(cnt > 5) break;
+                cnt++;
                 await helper.sleep(1000);
-                count++;
             }
+        }
 
-            if(count == 5) break;
+        if(!elementPresent) {
+            
+            await request({
+                service:  'actions',
+                function: 'follow',
+                cliente:   clienteSlug,
+                perfil_id: profile.id,
+                conta_id:  account.id,
+                status: 5
+            })
+
+            await driver.saveState();
+            await helper.sleep(2000);
+            await driver.exit();
+
+            return false;
+        }
+
+        let must_follow = false;
+        let elements = await browser.findElements(By.xpath("//time"));
+
+        for (let i = 0; i < elements.length; i++) {
+            
+            const element = elements[i];
+            let text = await element.getText();
+            text = text.trim();
+    
+            if(regexHora.test(text.trim())){
+                must_follow = true;
+                break;
+            }
+            
+            let dataTwitterPostMatch = text.match(regexData);
+            
+            if(dataTwitterPostMatch){
+                let status = datetime.checkDataTwitterPost(dataTwitterPostMatch.groups, 7);
+                if(status) {
+                    must_follow = true;
+                    break;
+                }
+            }
             
         }
 
-        
+        if(!must_follow) {
 
+            await request({
+                service:  'actions',
+                function: 'follow',
+                cliente:   clienteSlug,
+                perfil_id: profile.id,
+                conta_id:  account.id,
+                status: 5
+            })
+
+            await driver.saveState();
+            await helper.sleep(2000);
+            await driver.exit();
+
+            return false;
+        }
+
+    
         // seguir...
         
-        if(status){
+        count = 0;
+        let curtiu = 0;
+        let curtir = Math.round(Math.random() * (3 - 1) + 1); // curtir no máximo 2 publicações
 
-            count = 0;
-            let curtiu = 0;
-            let curtir = Math.round(Math.random() * (3 - 1) + 1); // curtir no máximo 2 publicações
-
-            while(true){
-                if(count == 5 || curtiu >= curtir) break;
-                try {
-                    await browser.findElement(By.xpath("//*[@data-testid='like']")).click();
-                    curtiu++;
-                    await helper.sleep(2000);
-                } catch (error) {
-                    await helper.sleep(2000);
-                    count++;
-                }
-            }
-
+        while(true){
+            if(count == 5 || curtiu >= curtir) break;
             try {
-
-                await browser
-                .findElement(By.xpath("//*[@data-testid='placementTracking']"))
-                .findElement(By.css('div'))
-                .findElement(By.css('div'))
-                .click()
-
-            } catch(e){
-                await driver.saveState();
+                await browser.findElement(By.xpath("//*[@data-testid='like']")).click();
+                curtiu++;
                 await helper.sleep(2000);
-                await driver.exit();
-                return false;
+            } catch (error) {
+                await helper.sleep(2000);
+                count++;
             }
-            
+        }
+
+        try {
+
+            await browser
+            .findElement(By.xpath("//*[@data-testid='placementTracking']"))
+            .findElement(By.css('div'))
+            .findElement(By.css('div'))
+            .click()
+
+        } catch(e){
+            await driver.saveState();
+            await helper.sleep(2000);
+            await driver.exit();
+            return false;
         }
 
         let resp = await request({
@@ -170,7 +203,7 @@ export default async cliente => {
                 
                 while(profiles.length > 0){
                     
-                    finish = false
+                    let finish = false
                     let espere = Math.round(Math.random() * (5 - 3) + 3);
 
                     for (let i = 0; i < contas.length; i++) {
@@ -184,7 +217,6 @@ export default async cliente => {
                     }
 
                     finish = true;
-                    console.log(espere);
                     await helper.sleep(espere * 60 * 1000);
                     
                     while(sleep) {

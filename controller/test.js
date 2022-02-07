@@ -1,76 +1,89 @@
-import cligen from "../service/cliente/cliente_generator.js";
-import login  from "../service/action/login.js";
+import Cliente from "../model/Cliente.js";
+import Driver from "../model/Driver.js";
+import { By, Key, promise } from 'selenium-webdriver'
 import helper from "../source/helper.js";
-import follow from "../service/action/follow.js";
-import ga_act from "../service/action/get_active_actions_client.js";
-import retweet from "../service/action/retweet.js";
+import datetime from "../source/datetime.js";
 
 const retweet_now = {}; 
 var statusAction  = false;
 
 export default async  _=> {
 
-    let list_clients = await cligen(helper.vars(["client"]))
-    let stat_follow  = {}
+
+    let account = {"id":"6","email":"samanthafigueiredo@huntmarketing.com.br","senha":"MTcxNj@172039","slug":"samanthexdefigo","actions":{"retweet":"30","follow":"40","unfollow":"5"}};
+    let profileTest1 = {"id":"212","slug":"M4LR1C10","nome":"Mauricio Teixeira","status":"1"}
+    let profileTest2 = {"id":"99999","slug":"manointrujao","nome":"Kapudjian","status":"1"}
+    let profileTest3 = {"id":"99999","slug":"sophiesishere","nome":"Sophie Schneider","status":"1"}
+    let cliente = {"id":"1","nome":"Vicentinho","slug":"vicentinho","machine_id":"1","status":"1"}
+
+    const cliObj = new Cliente(cliente, 0)
+    cliObj.setAccounts([account])
+    cliObj.setProfiles([profileTest2])
+    const prof = cliObj.profilesToFollow[0]
+
+    // console.log(cliObj);
+    // https://twitter.com/{slug}/with_replies
+    // document.querySelectorAll('time')
+    // 
+    // regex data (\d{1,2})(\sde\s)?([a-z]+)(\sde\s)?(\d{4})
+    //               dia               mes            ano       
     
-    console.log("criando clientes...");
-    for (let i = 0; i < list_clients.length; i++) {
-        const client = list_clients[i];
-        // stat_follow[client.slug] = await follow(client);
-        retweet_now[client.slug] = [];
+    
+    let driver = new Driver(account.email);
+    let browser = await driver.browser("https://twitter.com/"+prof.slug+"/with_replies")
+    
+    const regexHora = /(\d{1,2})(\s)?h/ig;
+    const regexData = /(?<dia>\d{1,2})(\sde\s)?(?<mes>[a-z]+)(\sde\s)?(?<ano>\d{4})?/i;
+
+    await helper.sleep(2000);
+    
+    let cnt = 1;
+    let elementPresent = false;
+
+    while (true) {
+        try {
+            await browser.findElement(By.xpath("//time"));
+            elementPresent = true;
+            break;
+        } catch(e) {
+            if(cnt > 5) break;
+            cnt++;
+            await helper.sleep(1000);
+        }
     }
 
-    // list_clients.forEach(cli => stat_follow[cli.slug].doit());
+    let must_follow = false;
 
-    setInterval(async _ => {
-
-        console.log("entrando aqui...");
-
-        if(statusAction) return;
-
-        statusAction = true;
-
-        console.log("bora...");
-
-        for (let x = 0; x < list_clients.length; x++) {
+    if(elementPresent) {
+        
+        let elements = await browser.findElements(By.xpath("//time"));
+        
+        for (let i = 0; i < elements.length; i++) {
             
-            const cli = list_clients[x];
-            let retsids = [];
-
-            for (let i = 0; i < retweet_now[cli.slug].length; i++) {
-                const retweet = retweet_now[cli.slug][i];
-                retsids.push(retweet.id);
+            const element = elements[i];
+            let text = await element.getText();
+            text = text.trim();
+    
+            if(regexHora.test(text.trim())){
+                must_follow = true;
+                break;
             }
-
-            console.log("configurando...");
-
-            let res = await ga_act(cli, retsids);
-            console.log(res);
-            if(!res) continue;
-
-            console.log("Pegou os links...");
             
-            //await stat_follow[cli.slug].await(true);
-            //while(!stat_follow[cli.slug].finish) await helper.sleep(1000);
-
-            let contas = cli.accounts;
-
-            for (let z = 0; z < contas.length; z++) {
-                for (let w = 0; w < res.length; w++) {
-                    const el = res[w];
-                    const conta = contas[z];
-                    await retweet(conta, el.link)
-                    retweet_now[cli.slug].push(el)
+            let dataTwitterPostMatch = text.match(regexData);
+            
+            if(dataTwitterPostMatch){
+                let status = datetime.checkDataTwitterPost(dataTwitterPostMatch.groups, 7);
+                if(status) {
+                    must_follow = true;
+                    break;
                 }
             }
-
-            //await stat_follow[cli.slug].await(false);
             
         }
-
-        statusAction = false;
-
-    }, 1000 * 2);
+        
+    }
 
 }
+
+
 

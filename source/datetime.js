@@ -45,6 +45,34 @@ export default {
         let data = new Date();
         let time = `${("0" + data.getHours()).slice(-2)}:${("0" + data.getMinutes()).slice(-2)}`;
         return time;
+    },
+
+    checkDataTwitterPost: function(dataTwitterPost, lim){
+        
+        let mesT = dataTwitterPost.mes.toLowerCase();
+        let ano  = dataTwitterPost.ano === undefined ? new Date().getFullYear() : dataTwitterPost.ano;
+        let mes = "00";
+
+        switch (mesT) {
+            case "jan": mes = "01"; break;
+            case "fev": mes = "02"; break;
+            case "mar": mes = "03"; break;
+            case "abr": mes = "04"; break;
+            case "mai": mes = "05"; break;
+            case "jun": mes = "06"; break;
+            case "jul": mes = "07"; break;
+            case "ago": mes = "08"; break;
+            case "set": mes = "09"; break;
+            case "out": mes = "10"; break;
+            case "nov": mes = "11"; break;
+            case "dez": mes = "12"; break;
+        }
+        const dataPost = new Date(ano, mes, dataTwitterPost.dia);
+        const limite = new Date();
+        limite.setDate(limite.getDate() - lim)
+        
+        return dataPost >= limite;
+
     }
     
 }
