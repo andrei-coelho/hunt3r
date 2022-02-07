@@ -37,7 +37,7 @@ export default async cliente => {
         const regexHora = /(\d{1,2})(\s)?h/ig;
         const regexData = /(?<dia>\d{1,2})(\sde\s)?(?<mes>[a-z]+)(\sde\s)?(?<ano>\d{4})?/i;
         let elementPresent = false;
-        
+
         while (true) {
             try {
                 await browser.findElement(By.xpath("//time"));
@@ -85,7 +85,7 @@ export default async cliente => {
             let dataTwitterPostMatch = text.match(regexData);
             
             if(dataTwitterPostMatch){
-                let status = datetime.checkDataTwitterPost(dataTwitterPostMatch.groups, 7);
+                let status = datetime.checkDataTwitterPost(dataTwitterPostMatch.groups, 4);
                 if(status) {
                     must_follow = true;
                     break;
