@@ -29,7 +29,7 @@ export default async cliente => {
                 count++;
             }
             if(count == 5){
-               return false;
+                return [false, "Nao foi possivel seguir o perfil, pois o botao de seguir nao apareceu..."];
             } 
         }
 
@@ -45,8 +45,8 @@ export default async cliente => {
                 elementPresent = true;
                 break;
             } catch(e) {
-                if(cnt > 5) break;
-                cnt++;
+                if(count > 5) break;
+                count++;
                 await helper.sleep(1000);
             }
         }
@@ -66,7 +66,7 @@ export default async cliente => {
             await helper.sleep(2000);
             await driver.exit();
 
-            return false;
+            return [false, "Nao e possivel seguir o perfil, porque nao eh possivel averigua-lo..."];
         }
 
         let must_follow = false;
@@ -110,7 +110,7 @@ export default async cliente => {
             await helper.sleep(2000);
             await driver.exit();
 
-            return false;
+            return [false, "Nao e possivel seguir o perfil, porque ele nao eh um usuario ativo..."];
         }
 
     
@@ -144,7 +144,7 @@ export default async cliente => {
             await driver.saveState();
             await helper.sleep(2000);
             await driver.exit();
-            return false;
+            return [false, "Nao foi possivel seguir o perfil..."];
         }
 
         let resp = await request({
@@ -160,12 +160,7 @@ export default async cliente => {
         await helper.sleep(2000);
         await driver.exit();
 
-        try {
-            let res = JSON.encode(resp);
-            return !res.error;
-        } catch (error) {
-            return false;
-        }
+        return [!resp.json.error, resp.text];
 
     }
 
@@ -211,7 +206,13 @@ export default async cliente => {
                     const conta      = contas[i];
                     let cFollowLimit = conta.actions.follow;
                     
-                    if(cFollowLimit > 0) await to_follow(conta, profile, slug)
+                    if(cFollowLimit > 0) {
+                        let resAtual = await to_follow(conta, profile, slug)
+                        if( resAtual[0]) log.out(resAtual[1], 'success');
+                        if(!resAtual[0]) log.out(resAtual[1], 'danger');
+                        conta.actions.follow = conta.actions.follow - 1;
+                    }
+
                     await helper.sleep(1000);
                 }
 
