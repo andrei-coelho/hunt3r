@@ -200,31 +200,27 @@ export default async cliente => {
                 await helper.sleep(1000 * 10)
             }
             
-            while(datetime.getMinutesDay() < final_time){
+            while(profiles.length > 0 && datetime.getMinutesDay() < final_time){
                 
-                while(profiles.length > 0){
-                    
-                    finish = false
-                    let espere = Math.round(Math.random() * (5 - 3) + 3);
+                finish = false
+                let espere = Math.round(Math.random() * (5 - 3) + 3);
 
-                    for (let i = 0; i < contas.length; i++) {
-                        
-                        const profile    = profiles.shift();
-                        const conta      = contas[i];
-                        let cFollowLimit = conta.actions.follow;
-                        
-                        if(cFollowLimit > 0) await to_follow(conta, profile, slug)
-                        await helper.sleep(1000);
-                    }
+                for (let i = 0; i < contas.length; i++) {
+                    
+                    const profile    = profiles.shift();
+                    const conta      = contas[i];
+                    let cFollowLimit = conta.actions.follow;
+                    
+                    if(cFollowLimit > 0) await to_follow(conta, profile, slug)
+                    await helper.sleep(1000);
+                }
 
-                    finish = true;
-                    await helper.sleep(espere * 60 * 1000);
-                    
-                    while(sleep) {
-                        console.log("Estou aguardando para continuar o trabalho..."); 
-                        await helper.sleep(1000);
-                    }
-                    
+                finish = true;
+                await helper.sleep(espere * 60 * 1000);
+                
+                while(sleep) {
+                    console.log("Estou aguardando para continuar o trabalho..."); 
+                    await helper.sleep(1000);
                 }
 
                 await helper.sleep(1000);
