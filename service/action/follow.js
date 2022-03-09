@@ -14,9 +14,10 @@ export default async cliente => {
     const to_follow = async (account, profile, clienteSlug) => {
 
         let driver = new Driver(account.getEmail())
-        let browser = await driver.browser('https://twitter.com/'+profile.slug);
+        let browser = await driver.browser('https://twitter.com/'+profile.slug+'/with_replies');
         
         await helper.sleep(3000);
+        helper.tryAgainButtonWatcher(browser);
 
         let count = 1;
 
@@ -112,23 +113,40 @@ export default async cliente => {
 
             return [false, "Nao e possivel seguir o perfil, porque ele nao eh um usuario ativo..."];
         }
-
     
         // seguir...
         
         count = 0;
         let curtiu = 0;
         let curtir = Math.round(Math.random() * (3 - 1) + 1); // curtir no máximo 2 publicações
+        let i = 0;
+        let statusTweets = true;
+        let tweets = null;
 
-        while(true){
-            if(count == 5 || curtiu >= curtir) break;
+        while (5 > count) {
             try {
-                await browser.findElement(By.xpath("//*[@data-testid='like']")).click();
-                curtiu++;
-                await helper.sleep(2000);
+                tweets = await browser.findElements(By.xpath("//*[@data-testid='tweet']"));
+                statusTweets = true;
+                break;
             } catch (error) {
+                statusTweets = false;
                 await helper.sleep(2000);
                 count++;
+            }
+        }
+
+        if(statusTweets){
+            for (let index = 0; index < tweets.length; index++) {
+                
+                const tweet = tweets[index];
+                if(curtiu >= curtir) break;
+
+                try {
+                    await tweet.findElement(By.xpath("//a[@href='/"+profile.slug+"']"))
+                    await tweet.findElement(By.xpath("//*[@data-testid='like']")).click();
+                } catch (error) {
+                    // silence here ...
+                }
             }
         }
 

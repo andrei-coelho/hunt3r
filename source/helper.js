@@ -1,3 +1,5 @@
+import { By } from 'selenium-webdriver'
+
 export default {
 
     isEmpty : obj => {
@@ -22,6 +24,16 @@ export default {
 
     },
 
-    sleep: m => new Promise(r => setTimeout(r, m))
+    sleep: m => new Promise(r => setTimeout(r, m)),
+
+    tryAgainButtonWatcher: async browser => {
+        setInterval(async () => {
+            try {
+                await browser.findElement(By.xpath("//span[contains(text(), 'Tentar novamente')]")).click();
+            } catch (error) {
+                // silence here...
+            }
+        }, 1000);
+    }
 
 }
