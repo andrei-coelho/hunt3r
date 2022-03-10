@@ -2,6 +2,7 @@
 import { Builder } from 'selenium-webdriver'
 import firefox from 'selenium-webdriver/firefox.js'
 import fs from 'fs'
+import helper from '../source/helper';
 
 
 const Driver = function(account, headless = false){
@@ -53,21 +54,29 @@ Driver.prototype.browser = async function(url){
     this.browser.cookiesDir = global.appRoot+'\\storage\\cookies\\';
     this.browser.cookieFile = this.browser.cookiesDir+this.account+".json";
     
-    if(fs.existsSync(this.browser.cookieFile)) {
+    while (true) {
+        try {
+            if(fs.existsSync(this.browser.cookieFile)) {
     
-        await this.browser.get(url);
+                await this.browser.get(url);
+                
+                let data = JSON.parse(fs.readFileSync(this.browser.cookieFile, 'utf8'));
         
-        let data = JSON.parse(fs.readFileSync(this.browser.cookieFile, 'utf8'));
+                for (let i = 0; i < data.length; i++) {
+                    await this.browser.manage().addCookie( data[i]);
+                }   
+                
+            }
+        
+            await this.browser.get(url);
+            await this.saveState();
+            return this.browser;
 
-        for (let i = 0; i < data.length; i++) {
-            await this.browser.manage().addCookie( data[i]);
-        }   
-        
+        } catch (error) {
+            helper.sleep(1000);
+        }
     }
-
-    await this.browser.get(url);
-    await this.saveState();
-    return this.browser;
+    
 
 }
 

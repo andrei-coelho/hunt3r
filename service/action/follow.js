@@ -4,7 +4,7 @@ import request from "../../source/request.js";
 import Driver from "../../model/Driver.js";
 import log from "../../source/log.js";
 import datetime from "../../source/datetime.js";
-
+import Navigator from "../../model/Navigator.js";
 
 export default async cliente => {
     
@@ -17,8 +17,7 @@ export default async cliente => {
         let browser = await driver.browser('https://twitter.com/'+profile.slug+'/with_replies');
         
         await helper.sleep(3000);
-        helper.tryAgainButtonWatcher(browser);
-
+        
         let count = 1;
 
         while(true){
